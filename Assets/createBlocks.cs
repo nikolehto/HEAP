@@ -9,9 +9,10 @@ public class createBlocks : MonoBehaviour {
     //private static string filePath = "Assets/Resources/Patterns/";
     //private static string file = filePath + fileName;
     public static string fileName = "Patterns/pattern01";
+    public GameObject prefab;
     Camera mainCam;
 
-    // Use this for initialization
+
     void Start () {
         mainCam = Camera.main;
         //Debug.Log(fileName);
@@ -99,10 +100,12 @@ public class createBlocks : MonoBehaviour {
             {
                 if (c == '1') // draw cube
                 {
-                    GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    //GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
+                    GameObject cube = Instantiate(prefab) as GameObject;
+
                     cube.transform.position = new Vector3(x, y, z);
                     //cube.renderer.material.color = Color.black;
-                    cube.GetComponent<Renderer>().material.color = Color.red;
+                    //cube.GetComponent<Renderer>().material.color = Color.red;
                     x += 1.0f;
                     //Debug.Log('1');
                 }

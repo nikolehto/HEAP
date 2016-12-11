@@ -1,28 +1,85 @@
 ﻿using UnityEngine;
 using System.IO;
 using System.Collections;
+using System.Collections.Generic;
 
 public class createBlocks : MonoBehaviour {
 
-    public static string fileName = "Patterns/pattern01";
     public GameObject prefab;
-    GameObject figure;
 
+    // This might cause problems - file path for reading differs from file path for searching filenames.
+    public static string filePathGetNames = "Assets/Resources/Patterns/";
+    public static string filePathReadFiles = "Patterns/";
+    private List<string> filenamesToRead = new List<string>();
+    private GameObject figure;
+
+    [HideInInspector]
+    public int currentIndex;
+    [HideInInspector]
+    public int maxIndex;
 
     void Start () {
+        currentIndex = 0;
+        maxIndex = -1;
+
+        // initialize filenames to filenamesToRead list
+
+        DirectoryInfo dir = new DirectoryInfo(filePathGetNames);
+        FileInfo[] info = dir.GetFiles("*.*");
+        foreach (FileInfo f in info)
+        {
+            string candidate = f.Name;
+            if(candidate.StartsWith("pattern") && candidate.EndsWith(".txt"))
+            {
+                candidate = candidate.Remove(candidate.Length - 4);
+                filenamesToRead.Add(candidate);
+                maxIndex += 1;
+            }
+        }
+
+        if (maxIndex == -1)
+        {
+            Debug.Log("Check figure folder");
+        }
+
+        string fileName = filePathReadFiles + filenamesToRead[currentIndex];
+
         figure = new GameObject();
         //Debug.Log(fileName);
-
         readAndInitPattern(fileName);
     }
 
-
-    void clearAll()
+    public void nextPattern()
     {
+        if (currentIndex != maxIndex)
+        {
+            currentIndex += 1;
+        }
+        else
+        {
+            // TODO: callback?
+            // inform that survey has ended 
+            
+            Debug.Log("was last, starting over");
+
+            // debug memory test start over
+            currentIndex = 0;
+        }
+
+        Destroy(figure);
+        figure = new GameObject();
+        string fileName = filePathReadFiles + filenamesToRead[currentIndex];
+        readAndInitPattern(fileName);
+    }
+
+    /*
+    public void clearAll()
+    {
+        //Debug.Log("Poistin kaikki cubet");
         // TODO: remove all cubes
 
     }
-
+    */
     void readAndInitPattern(string filename)
     {
          // Grab a reference to the camera

@@ -6,56 +6,70 @@ using System.Collections.Generic;
 public class createBlocks : MonoBehaviour {
 
     public GameObject prefab;
-
-    // This might cause problems - file path for reading differs from file path for searching filenames.
-    public static string filePathGetNames = "Assets/Resources/Patterns/";
     public static string filePathReadFiles = "Patterns/";
-    private List<string> filenamesToRead = new List<string>();
+    public static string patternPrefix = "pattern";
+    public static int startIndex = 1;
     private GameObject figure;
 
     [HideInInspector]
     public int currentIndex;
-    [HideInInspector]
-    public int maxIndex;
 
     void Start () {
-        currentIndex = 0;
-        maxIndex = -1;
+        currentIndex = startIndex;
 
-        // initialize filenames to filenamesToRead list
-
-        DirectoryInfo dir = new DirectoryInfo(filePathGetNames);
-        FileInfo[] info = dir.GetFiles("*.*");
-        foreach (FileInfo f in info)
-        {
-            string candidate = f.Name;
-            if(candidate.StartsWith("pattern") && candidate.EndsWith(".txt"))
-            {
-                candidate = candidate.Remove(candidate.Length - 4);
-                filenamesToRead.Add(candidate);
-                maxIndex += 1;
-            }
-        }
-
-        if (maxIndex == -1)
-        {
-            Debug.Log("Check figure folder");
-        }
-
-        string fileName = filePathReadFiles + filenamesToRead[currentIndex];
+        string fileName = getNameFor(currentIndex);
 
         figure = new GameObject();
-        //Debug.Log(fileName);
-        readAndInitPattern(fileName);
+        bool doesExist = readAndInitPattern(fileName);
+
+        if (!doesExist)
+        {
+            Debug.Log("Check filenames1");
+        }
+
+    }
+
+    string getNameFor(int index)
+    {
+        /**
+         * return: Name that is in same form than files in /filePathReadFiles/ folder
+         * */
+        string name;
+
+        name = index.ToString();
+
+        if(name.Length == 1)
+        {
+            name = "00" + name;
+        }
+
+        else if(name.Length == 2)
+        {
+            name = "0" + name;
+        }
+
+        // three is just fine
+        // four is too much
+        else if(name.Length > 3 )
+        {
+            Debug.Log("Limit of patterns 999 -  pattern naming rules and createBlocks::getNameFor must be changed");
+        }
+
+        name = filePathReadFiles + patternPrefix + name;
+        return name;
     }
 
     public void nextPattern()
     {
-        if (currentIndex != maxIndex)
-        {
-            currentIndex += 1;
-        }
-        else
+        currentIndex += 1;
+
+        Destroy(figure);
+        figure = new GameObject();
+        string fileName = getNameFor(currentIndex);
+        bool doesExist = readAndInitPattern(fileName);
+
+
+        if (!doesExist)
         {
             // TODO: callback?
             // inform that survey has ended 
@@ -63,13 +77,18 @@ public class createBlocks : MonoBehaviour {
             Debug.Log("was last, starting over");
 
             // debug memory test start over
-            currentIndex = 0;
+            currentIndex = startIndex;
+            fileName = getNameFor(currentIndex);
+            
+            doesExist = readAndInitPattern(fileName);
+            if(!doesExist)
+            {
+                Debug.Log("Check filenames1");
+            }
+                
         }
 
-        Destroy(figure);
-        figure = new GameObject();
-        string fileName = filePathReadFiles + filenamesToRead[currentIndex];
-        readAndInitPattern(fileName);
+        
     }
 
     /*
@@ -80,7 +99,7 @@ public class createBlocks : MonoBehaviour {
 
     }
     */
-    void readAndInitPattern(string filename)
+    bool readAndInitPattern(string filename)
     {
          // Grab a reference to the camera
 
@@ -97,6 +116,11 @@ public class createBlocks : MonoBehaviour {
         float fig_rot_z = 0.0f;
 
         TextAsset txtAsset = (TextAsset)Resources.Load(filename);
+        if (txtAsset == null)
+        {
+            return false;
+        }
+
         string[] linesFromfile = txtAsset.text.Split('\n');
 
         // 1. line = size of array
@@ -183,6 +207,8 @@ public class createBlocks : MonoBehaviour {
         }
         figure.transform.rotation = Quaternion.Euler(fig_rot_x, fig_rot_y, fig_rot_z);
         figure.transform.position = new Vector3(fig_pos_x, fig_pos_y, fig_pos_z);
+
+        return true;
     }
 
 

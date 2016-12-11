@@ -321,9 +321,9 @@ RectTransform:
   - {fileID: 734134015}
   m_Father: {fileID: 1779484489}
   m_RootOrder: 0
-  m_AnchorMin: {x: 0.5, y: 0.5}
-  m_AnchorMax: {x: 0.5, y: 0.5}
-  m_AnchoredPosition: {x: 507, y: -178}
+  m_AnchorMin: {x: 1, y: 0}
+  m_AnchorMax: {x: 1, y: 0}
+  m_AnchoredPosition: {x: -123, y: 119}
   m_SizeDelta: {x: 160, y: 160}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &813146947
@@ -365,12 +365,12 @@ MonoBehaviour:
   m_OnClick:
     m_PersistentCalls:
       m_Calls:
-      - m_Target: {fileID: 1330379053}
-        m_MethodName: 
+      - m_Target: {fileID: 1330379054}
+        m_MethodName: nextPattern
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: 
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
           m_IntArgument: 0
           m_FloatArgument: 0
           m_StringArgument: 
@@ -439,6 +439,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   prefab: {fileID: 1000010128096198, guid: 5f24f8025f5d3ef47b7f4b1d3d6a2ba1, type: 2}
+  currentIndex: 0
 --- !u!4 &1330379055
 Transform:
   m_ObjectHideFlags: 0

@@ -1,8 +1,4 @@
 !size = 4 X 4 X 3
-!f_pos = -4 X 0 X 12
-!f_rot = 20 X -70 X 60
-!r_pos = +8 X 0 X 0
-!r_rot = 0 X +90 X 0
 
 0110,
 0100,

@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using UnityEngine.UI;
 using System.IO;
 using System.Collections;
 using System.Collections.Generic;
@@ -7,26 +8,36 @@ public class createBlocks : MonoBehaviour {
 
     public GameObject prefab;
     public static string filePathReadFiles = "Patterns/";
-    public static string patternPrefix = "pattern";
+    public static string taskPrefix = "task";
     public static int startIndex = 1;
-    private GameObject figure, r_figure;
+    private GameObject original, rotated;
+    private Text label;
+    enum GoSwitch { original_t, rotated_t };
 
     [HideInInspector]
     public int currentIndex;
+
+    void Awake()
+    {
+        label = GameObject.Find("TaskNumberText").GetComponent<Text>();
+    }
 
     void Start () {
         currentIndex = startIndex;
 
         string fileName = getNameFor(currentIndex);
 
-        figure = new GameObject();
-        figure.name = "Original figure";
-        //r_figure = new GameObject();
-        bool doesExist = readAndInitPattern(fileName);
+        original = new GameObject();
+        original.name = "Original figure";
+
+        rotated = new GameObject();
+        rotated.name = "Rotated figure";
+
+        bool doesExist = readAndInitTask(fileName);
 
         if (!doesExist)
         {
-            Debug.Log("Check filenames1");
+            Debug.Log(fileName + " does not exist");
         }
 
     }
@@ -57,7 +68,7 @@ public class createBlocks : MonoBehaviour {
             Debug.Log("Limit of patterns 999 -  pattern naming rules and createBlocks::getNameFor must be changed");
         }
 
-        name = filePathReadFiles + patternPrefix + name;
+        name = filePathReadFiles + taskPrefix + name;
         return name;
     }
 
@@ -65,110 +76,121 @@ public class createBlocks : MonoBehaviour {
     {
         currentIndex += 1;
 
-        Destroy(r_figure);
-        Destroy(figure);
+        Destroy(rotated);
+        Destroy(original);
 
-
-        figure = new GameObject();
-        figure.name = "Original figure";
-        //r_figure = new GameObject();
+        original = new GameObject();
+        original.name = "Original figure";
+        rotated = new GameObject();
+        rotated.name = "Rotated figure";
 
         string fileName = getNameFor(currentIndex);
-        bool doesExist = readAndInitPattern(fileName);
-
+        bool doesExist = readAndInitTask(fileName);
 
         if (!doesExist)
         {
             // TODO: callback?
             // inform that survey has ended 
-            
-            Debug.Log("was last, starting over");
 
             // debug memory test start over
+            Debug.Log("was last, starting over");
             currentIndex = startIndex;
             fileName = getNameFor(currentIndex);
             
-            doesExist = readAndInitPattern(fileName);
+            doesExist = readAndInitTask(fileName);
             if(!doesExist)
             {
-                Debug.Log("Check filenames1");
+                Debug.Log("Cannot start over");
             }
                 
         }
-
-        
     }
 
-    /*
-    public void clearAll()
+    public void previousPattern()
     {
-        //Debug.Log("Poistin kaikki cubet");
-        // TODO: remove all cubes
+        currentIndex -= 1;
 
+        if(currentIndex < startIndex)
+        {
+            currentIndex = startIndex;
+        }
+
+        Destroy(rotated);
+        Destroy(original);
+
+        original = new GameObject();
+        original.name = "Original figure";
+        rotated = new GameObject();
+        rotated.name = "Rotated figure";
+
+        string fileName = getNameFor(currentIndex);
+        bool doesExist = readAndInitTask(fileName);
+
+        if (!doesExist)
+        {
+            // TODO: callback?
+            // inform that survey has ended 
+
+            // debug memory test start over
+            Debug.Log("Previous does not exist");
+            Debug.Log("");
+        }
     }
-    */
-    bool readAndInitPattern(string filename)
+
+    bool readPattern(string filename, GoSwitch go_switch, bool isMirrored = false)
     {
-         // Grab a reference to the camera
+        label.text = "Task " + currentIndex.ToString() ;
 
-        int x_size = -1;
-        int y_size = -1;
-        int z_size = -1;
-
-        Vector3 fig_pos = new Vector3();
-        Vector3 fig_rot = new Vector3();
-
-        Vector3 r_fig_pos = new Vector3();
-        Vector3 r_fig_rot = new Vector3();
+        // read pattern and save it to Figure
+        // if read fail return false
+        bool parseOk = true;
 
         TextAsset txtAsset = (TextAsset)Resources.Load(filename);
         if (txtAsset == null)
         {
+            Debug.Log("ReadPatternFail");
             return false;
         }
 
         string[] linesFromfile = txtAsset.text.Split('\n');
 
+        int x_size = -1;
+        int y_size = -1;
+        int z_size = -1;
+
         // 1. line = size of array
         string[] sizeOfArray = linesFromfile[0].Split('=')[1].Split('X');
-        int.TryParse(sizeOfArray[0], out x_size);
-        int.TryParse(sizeOfArray[1], out y_size);
-        int.TryParse(sizeOfArray[2], out z_size);
+        parseOk = parseOk && int.TryParse(sizeOfArray[0], out x_size);
+        parseOk = parseOk && int.TryParse(sizeOfArray[1], out y_size);
+        parseOk = parseOk && int.TryParse(sizeOfArray[2], out z_size);
 
-        // 2. line = location of array
-        string[] figurePosition = linesFromfile[1].Split('=')[1].Split('X');
-        float.TryParse(figurePosition[0], out fig_pos.x);
-        float.TryParse(figurePosition[1], out fig_pos.y);
-        float.TryParse(figurePosition[2], out fig_pos.z);
+        if (parseOk == false)
+        {
+            Debug.Log("ParsePatternFail");
+            return false;
+        }
 
-        // 3. line = rotation of array
-        string[] figureRotation = linesFromfile[2].Split('=')[1].Split('X');
-        float.TryParse(figureRotation[0], out fig_rot.x);
-        float.TryParse(figureRotation[1], out fig_rot.y);
-        float.TryParse(figureRotation[2], out fig_rot.z);
+        float x;
+        float increment_x;
 
-        // 4. line = location offset of array
-        string[] r_figurePosition = linesFromfile[3].Split('=')[1].Split('X');
-        float.TryParse(r_figurePosition[0], out r_fig_pos.x);
-        float.TryParse(r_figurePosition[1], out r_fig_pos.y);
-        float.TryParse(r_figurePosition[2], out r_fig_pos.z);
-
-        // 5. line = rotation offset of array
-        string[] r_figureRotation = linesFromfile[4].Split('=')[1].Split('X');
-        float.TryParse(r_figureRotation[0], out r_fig_rot.x);
-        float.TryParse(r_figureRotation[1], out r_fig_rot.y);
-        float.TryParse(r_figureRotation[2], out r_fig_rot.z);
-
-        r_fig_pos += fig_pos;
-        r_fig_rot += fig_rot;
-
-        float x = -(x_size/2);
-        float y = (y_size/2);
-        float z = -(z_size/2);
+        if (isMirrored == false)
+        {
+            x = -(x_size / 2);
+            increment_x = 1.0f;
+        }
+        else
+        {
+            x = +(x_size / 2);
+            increment_x = -1.0f;
+        }
+        float y = (y_size / 2);
+        float z = -(z_size / 2);
 
         float x_start = x;
         float y_start = y;
 
+        
+        
         foreach (string s in linesFromfile)
         {
             if (s.StartsWith("!") || s.StartsWith("//")) // comment
@@ -184,24 +206,30 @@ public class createBlocks : MonoBehaviour {
             }
 
             // else
-            
             foreach (char c in s)
             {
                 if (c == '1') // draw cube
                 {
                     GameObject cube = Instantiate(prefab) as GameObject;
-                    cube.transform.parent = figure.transform;
+                    
+                    switch (go_switch)
+                    {
+                        case GoSwitch.original_t:
+                            cube.transform.parent = original.transform;
+                            break;
+                        case GoSwitch.rotated_t:
+                            cube.transform.parent = rotated.transform;
+                            break;
+                    }
 
                     cube.transform.position = new Vector3(x, y, z);
-                    x += 1.0f;
-                    //Debug.Log('1');
+                    x += increment_x;
                 }
-             
+
                 else if (c == '0') // do not draw
                 {
 
-                    x += 1.0f;
-                    //Debug.Log('0');
+                    x += increment_x;
                 }
 
                 else if (c == ',') // next row
@@ -209,33 +237,93 @@ public class createBlocks : MonoBehaviour {
                     y -= 1.0f;
                     x = x_start;
                     break;
-                    //Debug.Log("OK");
                 }
 
                 else
                 {
-                    //Debug.Log("Unknown char");
-                    //Debug.Log(c);
+
                 }
             }
         }
 
+        return true;
 
-        
-        figure.transform.rotation = Quaternion.Euler(fig_rot);
-        figure.transform.position = fig_pos;
+    }
 
-        r_figure = Instantiate(figure) as GameObject;
-        //r_figure.transform.parent = figure.transform;
+    bool readAndInitTask(string filename)
+    {
+        Vector3 original_pos = new Vector3();
+        Vector3 original_rot = new Vector3();
 
-        r_figure.transform.rotation = Quaternion.Euler(r_fig_rot);
-        r_figure.transform.position = r_fig_pos;
+        Vector3 rotated_pos = new Vector3();
+        Vector3 rotated_rot = new Vector3();
 
+        string pattern1, pattern2;
+        bool isMirrored;
 
-        Debug.Log(r_fig_pos);
-        Debug.Log(r_fig_rot);
+        TextAsset txtAsset = (TextAsset)Resources.Load(filename);
+        if (txtAsset == null)
+        {
+            Debug.Log("txtAsset not exists");
+            return false;
+        }
 
-        r_figure.name = "Rotated figure";
+       string[] linesFromfile = txtAsset.text.Split('\n');
+
+        // 1. line = pattern name
+        pattern1 = linesFromfile[0].Split('=')[1].Trim();
+        pattern1 = filePathReadFiles + pattern1;
+
+        if (!readPattern(pattern1, GoSwitch.original_t))
+        {
+            Debug.Log("Read pattern1 failure :" + pattern1);
+        }
+
+        // 2. line = location of array
+        string[] figurePosition = linesFromfile[1].Split('=')[1].Split('X');
+        float.TryParse(figurePosition[0], out original_pos.x);
+        float.TryParse(figurePosition[1], out original_pos.y);
+        float.TryParse(figurePosition[2], out original_pos.z);
+
+        // 3. line = rotation of array
+        string[] figureRotation = linesFromfile[2].Split('=')[1].Split('X');
+        float.TryParse(figureRotation[0], out original_rot.x);
+        float.TryParse(figureRotation[1], out original_rot.y);
+        float.TryParse(figureRotation[2], out original_rot.z);
+
+        // 4. line = pattern name
+        pattern2 = linesFromfile[3].Split('=')[1].Trim();
+        pattern2 = filePathReadFiles + pattern2;
+
+        // 5. line = pattern is mirrored
+        string isMirrored_s = linesFromfile[4].Split('=')[1];
+        bool.TryParse(isMirrored_s, out isMirrored);
+
+        if (!readPattern(pattern2, GoSwitch.rotated_t, isMirrored))
+        {
+            Debug.Log("Read 'pattern2' failure :" + pattern2);
+        }
+
+        // 6. line = location offset of array
+        string[] r_figurePosition = linesFromfile[5].Split('=')[1].Split('X');
+        float.TryParse(r_figurePosition[0], out rotated_pos.x);
+        float.TryParse(r_figurePosition[1], out rotated_pos.y);
+        float.TryParse(r_figurePosition[2], out rotated_pos.z);
+
+        // 7. line = rotation offset of array
+        string[] r_figureRotation = linesFromfile[6].Split('=')[1].Split('X');
+        float.TryParse(r_figureRotation[0], out rotated_rot.x);
+        float.TryParse(r_figureRotation[1], out rotated_rot.y);
+        float.TryParse(r_figureRotation[2], out rotated_rot.z);
+
+        rotated_pos += original_pos;
+        rotated_rot += original_rot;
+
+        original.transform.rotation = Quaternion.Euler(original_rot);
+        original.transform.position = original_pos;
+
+        rotated.transform.rotation = Quaternion.Euler(rotated_rot);
+        rotated.transform.position = rotated_pos;
 
         return true;
     }

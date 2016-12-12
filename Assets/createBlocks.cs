@@ -9,7 +9,7 @@ public class createBlocks : MonoBehaviour {
     public static string filePathReadFiles = "Patterns/";
     public static string patternPrefix = "pattern";
     public static int startIndex = 1;
-    private GameObject figure;
+    private GameObject figure, r_figure;
 
     [HideInInspector]
     public int currentIndex;
@@ -20,6 +20,8 @@ public class createBlocks : MonoBehaviour {
         string fileName = getNameFor(currentIndex);
 
         figure = new GameObject();
+        figure.name = "Original figure";
+        //r_figure = new GameObject();
         bool doesExist = readAndInitPattern(fileName);
 
         if (!doesExist)
@@ -63,8 +65,14 @@ public class createBlocks : MonoBehaviour {
     {
         currentIndex += 1;
 
+        Destroy(r_figure);
         Destroy(figure);
+
+
         figure = new GameObject();
+        figure.name = "Original figure";
+        //r_figure = new GameObject();
+
         string fileName = getNameFor(currentIndex);
         bool doesExist = readAndInitPattern(fileName);
 
@@ -107,13 +115,11 @@ public class createBlocks : MonoBehaviour {
         int y_size = -1;
         int z_size = -1;
 
-        float fig_pos_x = 0.0f;
-        float fig_pos_y = 0.0f;
-        float fig_pos_z = 0.0f;
+        Vector3 fig_pos = new Vector3();
+        Vector3 fig_rot = new Vector3();
 
-        float fig_rot_x = 0.0f;
-        float fig_rot_y = 0.0f;
-        float fig_rot_z = 0.0f;
+        Vector3 r_fig_pos = new Vector3();
+        Vector3 r_fig_rot = new Vector3();
 
         TextAsset txtAsset = (TextAsset)Resources.Load(filename);
         if (txtAsset == null)
@@ -129,24 +135,32 @@ public class createBlocks : MonoBehaviour {
         int.TryParse(sizeOfArray[1], out y_size);
         int.TryParse(sizeOfArray[2], out z_size);
 
-        // 2. line = size of array
+        // 2. line = location of array
         string[] figurePosition = linesFromfile[1].Split('=')[1].Split('X');
-        float.TryParse(figurePosition[0], out fig_pos_x);
-        float.TryParse(figurePosition[1], out fig_pos_y);
-        float.TryParse(figurePosition[2], out fig_pos_z);
+        float.TryParse(figurePosition[0], out fig_pos.x);
+        float.TryParse(figurePosition[1], out fig_pos.y);
+        float.TryParse(figurePosition[2], out fig_pos.z);
 
-        // 3. line = size of array
+        // 3. line = rotation of array
         string[] figureRotation = linesFromfile[2].Split('=')[1].Split('X');
-        float.TryParse(figureRotation[0], out fig_rot_x);
-        float.TryParse(figureRotation[1], out fig_rot_y);
-        float.TryParse(figureRotation[2], out fig_rot_z);
+        float.TryParse(figureRotation[0], out fig_rot.x);
+        float.TryParse(figureRotation[1], out fig_rot.y);
+        float.TryParse(figureRotation[2], out fig_rot.z);
 
+        // 4. line = location offset of array
+        string[] r_figurePosition = linesFromfile[3].Split('=')[1].Split('X');
+        float.TryParse(r_figurePosition[0], out r_fig_pos.x);
+        float.TryParse(r_figurePosition[1], out r_fig_pos.y);
+        float.TryParse(r_figurePosition[2], out r_fig_pos.z);
 
-        // TODO : Read cameraposition
+        // 5. line = rotation offset of array
+        string[] r_figureRotation = linesFromfile[4].Split('=')[1].Split('X');
+        float.TryParse(r_figureRotation[0], out r_fig_rot.x);
+        float.TryParse(r_figureRotation[1], out r_fig_rot.y);
+        float.TryParse(r_figureRotation[2], out r_fig_rot.z);
 
-        //Debug.Log(x_size);
-        //Debug.Log(y_size);
-        //Debug.Log(z_size);
+        r_fig_pos += fig_pos;
+        r_fig_rot += fig_rot;
 
         float x = -(x_size/2);
         float y = (y_size/2);
@@ -157,7 +171,7 @@ public class createBlocks : MonoBehaviour {
 
         foreach (string s in linesFromfile)
         {
-            if (s.StartsWith("!")) // comment
+            if (s.StartsWith("!") || s.StartsWith("//")) // comment
             {
                 continue;
             }
@@ -175,9 +189,9 @@ public class createBlocks : MonoBehaviour {
             {
                 if (c == '1') // draw cube
                 {
-                    //GameObject cube = GameObject.CreatePrimitive(PrimitiveType.Cube);
                     GameObject cube = Instantiate(prefab) as GameObject;
                     cube.transform.parent = figure.transform;
+
                     cube.transform.position = new Vector3(x, y, z);
                     x += 1.0f;
                     //Debug.Log('1');
@@ -205,14 +219,29 @@ public class createBlocks : MonoBehaviour {
                 }
             }
         }
-        figure.transform.rotation = Quaternion.Euler(fig_rot_x, fig_rot_y, fig_rot_z);
-        figure.transform.position = new Vector3(fig_pos_x, fig_pos_y, fig_pos_z);
+
+
+        
+        figure.transform.rotation = Quaternion.Euler(fig_rot);
+        figure.transform.position = fig_pos;
+
+        r_figure = Instantiate(figure) as GameObject;
+        //r_figure.transform.parent = figure.transform;
+
+        r_figure.transform.rotation = Quaternion.Euler(r_fig_rot);
+        r_figure.transform.position = r_fig_pos;
+
+
+        Debug.Log(r_fig_pos);
+        Debug.Log(r_fig_rot);
+
+        r_figure.name = "Rotated figure";
 
         return true;
     }
 
 
-
+    
 
 	// Update is called once per frame
 	void Update () {

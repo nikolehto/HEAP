@@ -29,9 +29,14 @@ public class State : NetworkBehaviour
         //block.setTask(taskIndex);
     }
 
+    public override void OnStartClient()
+    {
+        base.OnStartClient();
+        block.setTask(taskIndex);
+    }
 
-     
-   public void NextTask()
+
+    public void NextTask()
     {
         taskIndex += 1;
     }

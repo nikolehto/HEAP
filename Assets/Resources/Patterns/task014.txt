@@ -1,0 +1,7 @@
+first pattern name = pattern1 
+figure position = -4 X 0 X 30
+figure rotation = 65 X 163 X 243
+second pattern_name = pattern1 
+mirrored = True 
+offset position = +8 X 0 X 0
+offset rotation = 0 X 200 X 0

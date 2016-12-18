@@ -17,4 +17,17 @@ public class Discovery : NetworkDiscovery
         }
     }
 
+
+    public void setAsClient()
+    {
+        Initialize();
+        StartAsClient();
+    }
+
+    public void setAsServer()
+    {
+        Initialize();
+        StartAsServer();
+    }
+
 }

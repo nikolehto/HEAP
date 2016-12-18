@@ -19,7 +19,9 @@ public class createBlocks : MonoBehaviour {
 
     void Awake()
     {
+
         label = GameObject.Find("TaskNumberText").GetComponent<Text>();
+
     }
 
     string getNameFor(int index)
@@ -211,6 +213,11 @@ public class createBlocks : MonoBehaviour {
 
         // 1. line = pattern name
         pattern1 = linesFromfile[0].Split('=')[1].Trim();
+        if (pattern1.StartsWith("prac"))
+        {
+            label.text = "Task " + currentIndex.ToString() + " (practice)";
+        }
+
         pattern1 = filePathReadFiles + pattern1;
 
         if (!readPattern(pattern1, GoSwitch.original_t))

@@ -26,5 +26,11 @@ public class Networking : NetworkManager
     {
         discovery.StopBroadcast();
         discovery.showGUI = true;
+        
+    }
+
+    public void startAsHost()
+    {
+        StartHost();
     }
 }

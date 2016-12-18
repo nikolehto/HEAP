@@ -7,16 +7,23 @@ public class State : NetworkBehaviour
 {
 
     public GameObject controller;
+    public GameObject head;
     public static int startIndex = 1;
+
 
     [HideInInspector]
     [SyncVar(hook = "OnChangeTask")]
     public int taskIndex;
+    [HideInInspector]
+    [SyncVar(hook = "OnSyncCall")]
+    public bool rotationState;
 
     private createBlocks block;
+    private sensorRotator sr;
 
     void Awake()
     {
+        sr = head.GetComponent<sensorRotator>();
         block = controller.GetComponent<createBlocks>();
     }
 
@@ -25,6 +32,7 @@ public class State : NetworkBehaviour
         if (isServer)
         {
             taskIndex = startIndex;
+            rotationState = false;
         }
         //block.setTask(taskIndex);
     }
@@ -46,9 +54,18 @@ public class State : NetworkBehaviour
         taskIndex -= 1;
     }
 
+    public void SyncRotation()
+    {
+        rotationState = !rotationState;
+    }
+
     void OnChangeTask(int newTask)
     {
         block.setTask(newTask);
     }
 	
+    void OnSyncCall(bool sync)
+    {
+        sr.setOffSet();
+    }
 }

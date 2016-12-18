@@ -9,7 +9,7 @@ public class createBlocks : MonoBehaviour {
     public GameObject prefab;
     public static string filePathReadFiles = "Patterns/";
     public static string taskPrefix = "task";
-    public static int startIndex = 1;
+
     private GameObject original, rotated;
     private Text label;
     enum GoSwitch { original_t, rotated_t };
@@ -19,26 +19,8 @@ public class createBlocks : MonoBehaviour {
 
     void Awake()
     {
+
         label = GameObject.Find("TaskNumberText").GetComponent<Text>();
-    }
-
-    void Start () {
-        currentIndex = startIndex;
-
-        string fileName = getNameFor(currentIndex);
-
-        original = new GameObject();
-        original.name = "Original figure";
-
-        rotated = new GameObject();
-        rotated.name = "Rotated figure";
-
-        bool doesExist = readAndInitTask(fileName);
-
-        if (!doesExist)
-        {
-            Debug.Log(fileName + " does not exist");
-        }
 
     }
 
@@ -72,75 +54,32 @@ public class createBlocks : MonoBehaviour {
         return name;
     }
 
-    public void nextPattern()
+    public bool setTask(int index)
     {
-        currentIndex += 1;
+        currentIndex = index;
 
-        Destroy(rotated);
-        Destroy(original);
+        if (rotated != null)
+        {
+            Destroy(rotated);
+        }
+        if (original != null)
+        {
+           Destroy(original);
+        }
 
         original = new GameObject();
         original.name = "Original figure";
         rotated = new GameObject();
         rotated.name = "Rotated figure";
 
-        string fileName = getNameFor(currentIndex);
-        bool doesExist = readAndInitTask(fileName);
+        string fileName = getNameFor(index);
+        return readAndInitTask(fileName);
 
-        if (!doesExist)
-        {
-            // TODO: callback?
-            // inform that survey has ended 
-
-            // debug memory test start over
-            Debug.Log("was last, starting over");
-            currentIndex = startIndex;
-            fileName = getNameFor(currentIndex);
-            
-            doesExist = readAndInitTask(fileName);
-            if(!doesExist)
-            {
-                Debug.Log("Cannot start over");
-            }
-                
-        }
     }
 
-    public void previousPattern()
-    {
-        currentIndex -= 1;
-
-        if(currentIndex < startIndex)
-        {
-            currentIndex = startIndex;
-        }
-
-        Destroy(rotated);
-        Destroy(original);
-
-        original = new GameObject();
-        original.name = "Original figure";
-        rotated = new GameObject();
-        rotated.name = "Rotated figure";
-
-        string fileName = getNameFor(currentIndex);
-        bool doesExist = readAndInitTask(fileName);
-
-        if (!doesExist)
-        {
-            // TODO: callback?
-            // inform that survey has ended 
-
-            // debug memory test start over
-            Debug.Log("Previous does not exist");
-            Debug.Log("");
-        }
-    }
 
     bool readPattern(string filename, GoSwitch go_switch, bool isMirrored = false)
     {
-        label.text = "Task " + currentIndex.ToString() ;
-
         // read pattern and save it to Figure
         // if read fail return false
         bool parseOk = true;
@@ -252,6 +191,8 @@ public class createBlocks : MonoBehaviour {
 
     bool readAndInitTask(string filename)
     {
+        label.text = "Task " + currentIndex.ToString();
+
         Vector3 original_pos = new Vector3();
         Vector3 original_rot = new Vector3();
 
@@ -272,6 +213,11 @@ public class createBlocks : MonoBehaviour {
 
         // 1. line = pattern name
         pattern1 = linesFromfile[0].Split('=')[1].Trim();
+        if (pattern1.StartsWith("prac"))
+        {
+            label.text = "Task " + currentIndex.ToString() + " (practice)";
+        }
+
         pattern1 = filePathReadFiles + pattern1;
 
         if (!readPattern(pattern1, GoSwitch.original_t))
@@ -328,11 +274,4 @@ public class createBlocks : MonoBehaviour {
         return true;
     }
 
-
-    
-
-	// Update is called once per frame
-	void Update () {
-	
-	}
 }

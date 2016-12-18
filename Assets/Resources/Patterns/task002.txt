@@ -1,7 +1,7 @@
-first pattern name = pattern2 
-figure position = -4 X 0 X 12
-figure rotation = 20 X -100 X 60
-second pattern_name = pattern2 
-mirrored = True
-offset position = +8 X 0 X 0
-offset rotation = 0 X +90 X 0
+first pattern name = prac1
+figure position = -3.5 X 0 X 22
+figure rotation = 0 X 40 X 20
+second pattern_name = prac1 
+mirrored = False
+offset position = +7 X 0 X 0
+offset rotation = 0 X +180 X 0

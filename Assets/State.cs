@@ -20,11 +20,13 @@ public class State : NetworkBehaviour
 
     private createBlocks block;
     private sensorRotator sr;
+    private AudioSource source;
 
     void Awake()
     {
         sr = head.GetComponent<sensorRotator>();
         block = controller.GetComponent<createBlocks>();
+        source = head.GetComponent<AudioSource>();
     }
 
 	// Use this for initialization
@@ -47,6 +49,7 @@ public class State : NetworkBehaviour
     public void NextTask()
     {
         taskIndex += 1;
+        source.PlayOneShot((AudioClip)Resources.Load("Hit4"));
     }
 
     public void PreviousTask()

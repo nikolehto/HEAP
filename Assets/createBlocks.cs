@@ -10,6 +10,7 @@ public class createBlocks : MonoBehaviour {
     public static string filePathReadFiles = "Patterns/";
     public static string taskPrefix = "task";
 
+    AudioSource audio;
     private GameObject original, rotated;
     private Text label;
     enum GoSwitch { original_t, rotated_t };
@@ -19,7 +20,7 @@ public class createBlocks : MonoBehaviour {
 
     void Awake()
     {
-
+        audio = GetComponent<AudioSource>();
         label = GameObject.Find("TaskNumberText").GetComponent<Text>();
 
     }
@@ -73,8 +74,9 @@ public class createBlocks : MonoBehaviour {
         rotated.name = "Rotated figure";
 
         string fileName = getNameFor(index);
+        audio.Play();
         return readAndInitTask(fileName);
-
+        
     }
 
 

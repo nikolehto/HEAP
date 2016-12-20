@@ -8,7 +8,7 @@ public class sensorRotator : MonoBehaviour {
     // Use this for initialization
     void Start()
     {
-        enabled = false;
+        rot_enabled = false;
         Input.compensateSensors = true;
         Input.gyro.enabled = true;
     }
